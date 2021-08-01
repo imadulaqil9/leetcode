@@ -1,0 +1,73 @@
+<script type="text/javascript">
+
+    let input;
+    (async () => {
+        const resp = await fetch('input.txt');
+        const data = await resp.text();
+        input = JSON.parse(data);
+    })();
+
+    class TreeNode {
+        constructor(val, left, right) {
+            this.val = val || 0;
+            this.left = left || null;
+            this.right = right || null;
+        }
+    }
+
+    const input_to_tree_node = (input) => {
+        const root = new TreeNode(input.shift());
+        const queue = [root];
+        const poll = (value) => {
+            if (value !== null && value !== undefined) {
+                const node = new TreeNode(value);
+                queue.push(node);
+                return node;
+            }
+            return null;
+        };
+        while (queue.length > 0) {
+            const node = queue.shift();
+            node.left = poll(input.shift());
+            node.right = poll(input.shift());
+        }
+        return root;
+    };
+
+    const width_of_binary_tree = function (root) {
+        if (root === null) return 0;
+
+        const queue = [{
+            node: root,
+            index: 0
+        }];
+
+        let max_width = 0;
+
+        while (queue.length > 0) {
+            let size = queue.length;
+
+            const first = queue[0];
+            let current = first;
+
+            while (size-- > 0) {
+                current = queue.shift();
+
+                // prepare the next level
+                if (current.node.left !== null) queue.push({ node: current.node.left, index: current.index * 2 });
+                if (current.node.right !== null) queue.push({ node: current.node.right, index: current.index * 2 + 1 });
+            }
+
+            // compare max width
+            max_width = Math.max(max_width, current.index - first.index + 1);
+
+            // redefine index to avoid it goes infinity
+            for (let i = queue.length - 1; i >= 0; --i) {
+                queue[i].index -= queue[0].index;
+            }
+        }
+
+        return max_width;
+    };
+
+</script>
